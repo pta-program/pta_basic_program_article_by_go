@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>PTA 基础编程题目集 · Go语言实现</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="PTA基础编程题目集 Go语言实现 - 51题完整题解">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-darklight-theme@latest/dist/style.min.css">
+  <style>
+    :root {
+      --theme-color: #00ADD8;
+      /* ---- Code palette — Soft Lavender Paper ---- 
+         Rationale: light tinted #F6F7FC (lavender-gray) reads softer than harsh #fff / #f0f0f0,
+         still high contrast (text #2a2f45 ratio > 12:1). Theme color #6A5ACD is used as accent,
+         not background, to keep readability. Input/Output blocks use warm paper #FFFBF0 to
+         distinguish sample IO from executable Cangjie code. Prism tokens tuned for light bg
+         with muted comment, saturated keyword (theme purple), teal strings, amber numbers.
+      */
+      --code-bg: #F6F7FC;
+      --code-bg-io: #FFFBF0;
+      --code-border: #E8EAF2;
+      --code-border-io: #F0DFC0;
+      --inline-code-bg: #EFEFFF;
+      --inline-code-border: #E3E4FD;
+      --inline-code-text: #4A3FB5;
+      --code-text: #2A2F45;
+      --code-shadow: 0 8px 24px rgba(106,90,205,0.06), 0 2px 8px rgba(0,0,0,0.04);
+      --code-radius: 12px;
+      --font-mono: 'JetBrains Mono','Cascadia Code','Fira Code',Consolas,Monaco,'Andale Mono',monospace;
+      /* ---- Dark palette (not pure black, tasteful bluish) ---- */
+      --dark-bg: #12131A;
+      --dark-surface: #1C1F2E;
+      --dark-sidebar: #171A27;
+      --dark-border: #2A2F4A;
+      --dark-border-soft: #23263A;
+      --dark-text: #C8CBD8;
+      --dark-text-strong: #E6E8F2;
+      --dark-text-muted: #8A8FA8;
+      --dark-link: #9B8CFF;
+      --dark-link-hover: #B8ACFF;
+    }
+
+    /* 顶部导航微调 */
+    .app-name-link img { height: 28px; }
+    /* 侧边栏分组标题加粗 */
+    .sidebar-nav > ul > li > p { font-weight: 700; color: #333; letter-spacing: 0.02em; }
+    /* 封面按钮若启用 */
+    .cover-main .anchor span { color: var(--theme-color); }
+    /* 深色模式按钮 — hello-agents 玻璃拟态 + 主题紫 — 右下角 (bottom-right) */
+    .darklight-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      top: auto;
+      left: auto;
+      z-index: 9999;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.86);
+      backdrop-filter: blur(12px) saturate(1.2);
+      -webkit-backdrop-filter: blur(12px) saturate(1.2);
+      border: 1px solid #E8EAF2;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      color: #5B4DBC;
+      box-shadow: 0 4px 16px rgba(106,90,205,0.12), 0 1px 3px rgba(0,0,0,0.06);
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .darklight-btn:hover {
+      transform: translateY(-1px) scale(1.04);
+      box-shadow: 0 8px 24px rgba(106,90,205,0.18), 0 2px 8px rgba(0,0,0,0.08);
+      border-color: #D8DAF0;
+      background: #FFFFFF;
+    }
+    .darklight-btn:active { transform: scale(0.96); }
+    .darklight-btn .icon-sun, .darklight-btn .icon-moon { transition: transform 0.3s, opacity 0.3s; position: absolute; }
+    .darklight-btn .icon-sun { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+    .darklight-btn .icon-moon { opacity: 1; transform: rotate(0) scale(1); }
+    /* when dark, swap icons via CSS if JS sets data-theme — JS also toggles inner text fallback */
+    body.dark-mode .darklight-btn {
+      background: rgba(35,38,58,0.9);
+      border-color: #2E344D;
+      color: #F0C24A;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.3);
+    }
+    body.dark-mode .darklight-btn:hover { background: #2A2F45; border-color: #3A415C; }
+    body.dark-mode .darklight-btn .icon-sun { opacity: 1; transform: rotate(0) scale(1); }
+    body.dark-mode .darklight-btn .icon-moon { opacity: 0; transform: rotate(90deg) scale(0.5); }
+
+    /* =========================================================
+       1. Code Block Container — overrides vue.css & darklight
+       ========================================================= */
+    .markdown-section pre {
+      background: var(--code-bg) !important;
+      border: 1px solid var(--code-border) !important;
+      border-radius: var(--code-radius) !important;
+      padding: 1.35rem 1.5rem !important;
+      margin: 1.25em 0 !important;
+      box-shadow: var(--code-shadow);
+      overflow: auto;
+      position: relative;
+      line-height: 0; /* fix extra gap */
+    }
+    .markdown-section pre::after {
+      /* subtle inner highlight */
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: var(--code-radius);
+      pointer-events: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    /* language badge — uses docsify's data-lang attr */
+    .markdown-section pre[data-lang]::before {
+      content: attr(data-lang);
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8A8FA8;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--code-border);
+      padding: 2px 8px;
+      border-radius: 999px;
+      z-index: 2;
+      line-height: 1.4;
+    }
+    /* Cangjie / main code — left accent */
+    .markdown-section pre[data-lang="cangjie"],
+    .markdown-section pre[data-lang="cj"],
+    .markdown-section pre[data-lang="c"],
+    .markdown-section pre[data-lang="cpp"],
+    .markdown-section pre[data-lang="java"],
+    .markdown-section pre[data-lang="python"],
+    .markdown-section pre[data-lang="js"] {
+      border-left: 3px solid #00ADD8 !important;
+    }
+    /* Input / Output sample blocks — warm paper, dashed */
+    .markdown-section pre[data-lang="in"],
+    .markdown-section pre[data-lang="input"],
+    .markdown-section pre[data-lang="out"],
+    .markdown-section pre[data-lang="output"],
+    .markdown-section pre[data-lang="txt"],
+    .markdown-section pre[data-lang="text"] {
+      background: var(--code-bg-io) !important;
+      border: 1px dashed var(--code-border-io) !important;
+      border-left: 3px solid #E8A838 !important;
+      box-shadow: none !important;
+    }
+    .markdown-section pre[data-lang="in"]::before,
+    .markdown-section pre[data-lang="input"]::before { background: #FFF7E6; border-color: #F0DFC0; color: #9A6B1E; }
+    .markdown-section pre[data-lang="out"]::before,
+    .markdown-section pre[data-lang="output"]::before { background: #EFFAF5; border-color: #C8E9DC; color: #0E7A6B; }
+
+    /* Code element inside pre — reset vue.css */
+    .markdown-section pre > code {
+      background: transparent !important;
+      color: var(--code-text) !important;
+      font-family: var(--font-mono) !important;
+      font-size: 13.5px !important;
+      line-height: 1.68 !important;
+      font-weight: 400;
+      white-space: pre !important;
+      word-break: normal !important;
+      word-wrap: normal !important;
+      tab-size: 2;
+      display: block;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      overflow-x: visible;
+    }
+    /* scrollbar styling for code blocks */
+    .markdown-section pre::-webkit-scrollbar { height: 8px; width: 8px; }
+    .markdown-section pre::-webkit-scrollbar-thumb { background: #D8DAE8; border-radius: 999px; border: 2px solid var(--code-bg); }
+    .markdown-section pre::-webkit-scrollbar-thumb:hover { background: #C4C6DC; }
+    .markdown-section pre::-webkit-scrollbar-track { background: transparent; }
+    /* warm scrollbar for IO blocks */
+    .markdown-section pre[data-lang="in"]::-webkit-scrollbar-thumb,
+    .markdown-section pre[data-lang="out"]::-webkit-scrollbar-thumb { border-color: var(--code-bg-io); background: #E8DCC2; }
+
+    /* =========================================================
+       2. Prism Token Colors — tuned for light soft bg
+       High contrast, not neon. Inspired by hello-agents but softer.
+       ========================================================= */
+    .markdown-section pre .token.comment,
+    .markdown-section pre .token.prolog,
+    .markdown-section pre .token.cdata {
+      color: #8A8FA8 !important;
+      font-style: italic;
+      font-weight: 400;
+    }
+    .markdown-section pre .token.keyword,
+    .markdown-section pre .token.builtin,
+    .markdown-section pre .token.tag {
+      color: #5B4DBC !important;
+      font-weight: 600;
+    }
+    .markdown-section pre .token.string,
+    .markdown-section pre .token.attr-value,
+    .markdown-section pre .token.char,
+    .markdown-section pre .token.regex {
+      color: #0E7A6B !important;
+    }
+    .markdown-section pre .token.function,
+    .markdown-section pre .token.attr-name {
+      color: #2B5DDD !important;
+    }
+    .markdown-section pre .token.number,
+    .markdown-section pre .token.boolean,
+    .markdown-section pre .token.constant {
+      color: #C05621 !important;
+      font-weight: 500;
+    }
+    .markdown-section pre .token.operator,
+    .markdown-section pre .token.entity,
+    .markdown-section pre .token.url {
+      color: #3A415C !important;
+    }
+    .markdown-section pre .token.punctuation {
+      color: #6B7280 !important;
+    }
+    .markdown-section pre .token.class-name,
+    .markdown-section pre .token.type,
+    .markdown-section pre .token.maybe-class-name {
+      color: #8B5A00 !important;
+      font-weight: 500;
+    }
+    .markdown-section pre .token.variable {
+      color: #2A2F45 !important;
+    }
+    .markdown-section pre .token.property {
+      color: #5B4DBC !important;
+    }
+    .markdown-section pre .token.selector,
+    .markdown-section pre .token.important,
+    .markdown-section pre .token.atrule {
+      color: #5B4DBC !important;
+      font-weight: 600;
+    }
+    /* Cangjie-specific — main, func, let etc will map to keyword; ensure italic comments stand out */
+    .markdown-section pre .token.doc-comment { color: #8A8FA8 !important; font-style: italic; }
+
+    /* selection inside code */
+    .markdown-section pre ::selection { background: rgba(106,90,205,0.18); }
+
+    /* =========================================================
+       3. Inline Code — distinct from block (pill)
+       ========================================================= */
+    .markdown-section p > code,
+    .markdown-section li > code,
+    .markdown-section td > code,
+    .markdown-section h1 code, .markdown-section h2 code, .markdown-section h3 code,
+    .markdown-section h4 code, .markdown-section h5 code {
+      background: var(--inline-code-bg) !important;
+      color: var(--inline-code-text) !important;
+      border: 1px solid var(--inline-code-border) !important;
+      border-radius: 6px !important;
+      padding: 0.16em 0.42em !important;
+      margin: 0 1px;
+      font-family: var(--font-mono) !important;
+      font-size: 0.88em !important;
+      font-weight: 500 !important;
+      white-space: break-spaces;
+      word-break: break-word;
+      vertical-align: baseline;
+      box-shadow: none !important;
+    }
+    /* avoid double styling inside pre */
+    .markdown-section pre code { background: transparent !important; border: none !important; padding: 0 !important; color: inherit !important; }
+
+    /* =========================================================
+       4. Copy Code Button — subtle, appears on hover
+       ========================================================= */
+    .docsify-copy-code-button,
+    .markdown-section pre .docsify-copy-code-button {
+      background: #FFFFFF !important;
+      color: #6B7280 !important;
+      border: 1px solid var(--code-border) !important;
+      border-radius: 8px !important;
+      padding: 4px 10px !important;
+      font-family: var(--font-mono) !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.02em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+      top: 10px !important;
+      right: 48px !important; /* leave space for lang badge */
+      opacity: 0 !important;
+      transform: translateY(-2px);
+      transition: all 0.2s ease !important;
+      z-index: 3;
+    }
+    .markdown-section pre:hover .docsify-copy-code-button { opacity: 1 !important; transform: translateY(0); }
+    .docsify-copy-code-button:hover { color: #6A5ACD !important; border-color: #B8B2E8 !important; background: #F6F7FF !important; }
+    .docsify-copy-code-button:active { transform: scale(0.96); }
+    /* IO blocks button tweak */
+    .markdown-section pre[data-lang="in"] .docsify-copy-code-button,
+    .markdown-section pre[data-lang="out"] .docsify-copy-code-button { right: 12px !important; top: 8px !important; }
+
+    /* =========================================================
+       5. Responsive
+       ========================================================= */
+    @media (max-width: 768px) {
+      .markdown-section pre { padding: 1.1rem 1rem !important; border-radius: 10px !important; margin: 1em -8px !important; }
+      .markdown-section pre > code { font-size: 12.8px !important; line-height: 1.62 !important; }
+      .markdown-section pre[data-lang]::before { font-size: 10px; padding: 1px 6px; top: 8px; right: 8px; }
+      .docsify-copy-code-button { opacity: 1 !important; transform: none; right: 8px !important; }
+      .markdown-section p > code, .markdown-section li > code { font-size: 0.86em !important; }
+    }
+
+    /* =========================================================
+       6. Full Dark Theme — unified on body.dark-mode
+       Compatible aliases: body.dark / html.dark / [data-theme="dark"] kept for docsify-darklight
+       Palette: deep navy #12131A, surface #1C1F2E / sidebar #171A27, border #23263A/#2A2F4A,
+                text #C8CBD8, strong #E6E8F2, muted #8A8FA8, link #9B8CFF
+       ========================================================= */
+    /* base */
+    body.dark-mode, body.dark, html.dark body, html[data-theme="dark"] body {
+      background: var(--dark-bg) !important;
+      color: var(--dark-text) !important;
+    }
+    body.dark-mode {
+      color-scheme: dark;
+    }
+    /* content area */
+    body.dark-mode .content,
+    body.dark .content,
+    html.dark .content,
+    html[data-theme="dark"] .content {
+      background: var(--dark-bg) !important;
+    }
+    body.dark-mode .markdown-section,
+    body.dark .markdown-section,
+    html.dark .markdown-section,
+    html[data-theme="dark"] .markdown-section {
+      color: var(--dark-text) !important;
+      background: transparent !important;
+    }
+    /* headings */
+    body.dark-mode .markdown-section h1,
+    body.dark-mode .markdown-section h2,
+    body.dark-mode .markdown-section h3,
+    body.dark-mode .markdown-section h4,
+    body.dark-mode .markdown-section h5,
+    body.dark-mode .markdown-section h6,
+    body.dark .markdown-section h1, body.dark .markdown-section h2, body.dark .markdown-section h3,
+    html.dark .markdown-section h1, html.dark .markdown-section h2 {
+      color: var(--dark-text-strong) !important;
+      border-color: var(--dark-border-soft) !important;
+    }
+    body.dark-mode .markdown-section h1 a, body.dark-mode .markdown-section h2 a { color: inherit !important; }
+    body.dark-mode .markdown-section h2 span, body.dark-mode .anchor span { color: var(--dark-text-muted) !important; }
+
+    /* links */
+    body.dark-mode .markdown-section a,
+    body.dark .markdown-section a,
+    html.dark .markdown-section a { color: var(--dark-link) !important; }
+    body.dark-mode .markdown-section a:hover { color: var(--dark-link-hover) !important; }
+
+    /* paragraphs, strong, em */
+    body.dark-mode .markdown-section p,
+    body.dark-mode .markdown-section li,
+    body.dark-mode .markdown-section td { color: var(--dark-text) !important; }
+    body.dark-mode .markdown-section strong { color: var(--dark-text-strong) !important; }
+    body.dark-mode .markdown-section em { color: #aeb2c8 !important; }
+    body.dark-mode .markdown-section hr { border-color: var(--dark-border-soft) !important; background: var(--dark-border-soft) !important; }
+
+    /* blockquote — keep theme accent */
+    body.dark-mode .markdown-section blockquote,
+    body.dark .markdown-section blockquote,
+    html.dark .markdown-section blockquote {
+      background: var(--dark-surface) !important;
+      border-left: 4px solid var(--theme-color) !important;
+      color: var(--dark-text-muted) !important;
+    }
+    body.dark-mode .markdown-section blockquote p { color: var(--dark-text-muted) !important; }
+
+    /* tables */
+    body.dark-mode .markdown-section table th,
+    body.dark .markdown-section table th,
+    html.dark .markdown-section table th {
+      background: var(--dark-surface) !important;
+      color: var(--dark-text-strong) !important;
+      border-color: var(--dark-border-soft) !important;
+    }
+    body.dark-mode .markdown-section table td,
+    body.dark-mode .markdown-section table tr,
+    body.dark .markdown-section table td,
+    html.dark .markdown-section table td {
+      border-color: var(--dark-border-soft) !important;
+      background: transparent !important;
+      color: var(--dark-text) !important;
+    }
+    body.dark-mode .markdown-section tr:nth-child(2n) { background: #1A1D2E !important; }
+
+    /* kbd, tips */
+    body.dark-mode .markdown-section kbd {
+      background: #23263A !important;
+      border-color: var(--dark-border) !important;
+      color: var(--dark-text) !important;
+      box-shadow: none !important;
+    }
+    body.dark-mode .markdown-section .tip,
+    body.dark-mode .markdown-section .warn {
+      background: var(--dark-surface) !important;
+      border-color: var(--dark-border) !important;
+      color: var(--dark-text) !important;
+    }
+
+    /* sidebar */
+    body.dark-mode .sidebar,
+    body.dark .sidebar,
+    html.dark .sidebar,
+    html[data-theme="dark"] .sidebar {
+      background: var(--dark-sidebar) !important;
+      border-right: 1px solid var(--dark-border-soft) !important;
+      color: var(--dark-text) !important;
+    }
+    body.dark-mode .sidebar-toggle,
+    body.dark .sidebar-toggle {
+      background: var(--dark-sidebar) !important;
+    }
+    body.dark-mode .sidebar-toggle span { background: var(--dark-text-muted) !important; }
+    body.dark-mode .sidebar .sidebar-nav a,
+    body.dark .sidebar .sidebar-nav a,
+    html.dark .sidebar .sidebar-nav a {
+      color: #A8ADC8 !important;
+    }
+    body.dark-mode .sidebar .sidebar-nav li.active > a,
+    body.dark-mode .sidebar .sidebar-nav a:hover {
+      color: var(--dark-link) !important;
+      background: rgba(106,90,205,0.10) !important;
+      border-right: 2px solid var(--theme-color) !important;
+    }
+    body.dark-mode .sidebar-nav > ul > li > p,
+    body.dark .sidebar-nav > ul > li > p { color: var(--dark-text-strong) !important; border-color: var(--dark-border-soft) !important; }
+    body.dark-mode .sidebar ul li a { border-color: transparent !important; }
+    body.dark-mode .app-name-link, body.dark-mode .app-name { color: var(--dark-text-strong) !important; }
+    body.dark-mode .sidebar .search, body.dark-mode .sidebar .search input { background: transparent !important; }
+
+    /* search */
+    body.dark-mode .search,
+    body.dark .search,
+    html.dark .search {
+      background: var(--dark-sidebar) !important;
+      border-color: var(--dark-border-soft) !important;
+    }
+    body.dark-mode .search input,
+    body.dark .search input,
+    html.dark .search input {
+      background: #1E2130 !important;
+      border: 1px solid var(--dark-border) !important;
+      color: var(--dark-text) !important;
+    }
+    body.dark-mode .search input::placeholder { color: #7A829E !important; }
+    body.dark-mode .search .results-panel,
+    body.dark .search .results-panel {
+      background: var(--dark-sidebar) !important;
+      border: 1px solid var(--dark-border) !important;
+      color: var(--dark-text) !important;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45) !important;
+    }
+    body.dark-mode .search .matching-post,
+    body.dark-mode .search h2 { border-color: var(--dark-border-soft) !important; color: var(--dark-text) !important; }
+    body.dark-mode .search .matching-post a { color: var(--dark-text) !important; }
+    body.dark-mode .search p.empty { color: #7A829E !important; }
+
+    /* pagination */
+    body.dark-mode .docsify-pagination-container,
+    body.dark .docsify-pagination-container {
+      border-top: 1px solid var(--dark-border-soft) !important;
+    }
+    body.dark-mode .pagination-item-title,
+    body.dark-mode .docsify-pagination-container a { color: var(--dark-text-strong) !important; }
+    body.dark-mode .pagination-item-subtitle { color: var(--dark-text-muted) !important; }
+
+    /* cover */
+    body.dark-mode .cover,
+    body.dark .cover { background: var(--dark-bg) !important; color: var(--dark-text) !important; }
+    body.dark-mode .cover-main .anchor span { color: var(--dark-link) !important; }
+
+    /* github corner, app-nav */
+    body.dark-mode .github-corner svg { fill: var(--theme-color) !important; color: var(--dark-bg) !important; }
+    body.dark-mode .app-nav a { color: var(--dark-text-muted) !important; }
+    body.dark-mode .app-nav a:hover { color: var(--dark-link) !important; }
+
+    /* count, progress */
+    body.dark-mode .count, body.dark-mode .count span { color: #7A829E !important; }
+    body.dark-mode .progress { background: var(--dark-border-soft) !important; }
+
+    /* scrollbars */
+    body.dark-mode::-webkit-scrollbar, html.dark-mode::-webkit-scrollbar { width: 10px; height: 10px; }
+    body.dark-mode::-webkit-scrollbar-thumb { background: #2A2F4A; border-radius: 999px; border: 2px solid var(--dark-bg); }
+    body.dark-mode::-webkit-scrollbar-track { background: var(--dark-bg); }
+    body.dark-mode .sidebar::-webkit-scrollbar-thumb { background: #2A2F4A; border-color: var(--dark-sidebar); }
+
+    /* =========================================================
+       7. Dark Code Blocks — unified selector body.dark-mode
+       (keeps aliases for compatibility)
+       ========================================================= */
+    body.dark-mode .markdown-section pre,
+    body.dark .markdown-section pre,
+    html.dark .markdown-section pre,
+    html[data-theme="dark"] .markdown-section pre,
+    #docsify-darklight-theme.dark .markdown-section pre {
+      background: #1E2130 !important;
+      border-color: #2E344D !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
+    }
+    body.dark-mode .markdown-section pre::after { box-shadow: inset 0 1px 0 rgba(255,255,255,0.04) !important; }
+    body.dark-mode .markdown-section pre > code,
+    body.dark .markdown-section pre > code,
+    html.dark .markdown-section pre > code,
+    html[data-theme="dark"] .markdown-section pre > code { color: #E6E8F2 !important; }
+    body.dark-mode .markdown-section pre[data-lang]::before,
+    body.dark .markdown-section pre[data-lang]::before,
+    html.dark .markdown-section pre[data-lang]::before { background: #2A2F45 !important; border-color: #3A415C !important; color: #A8ADC8 !important; }
+    body.dark-mode .markdown-section pre[data-lang="cangjie"],
+    body.dark-mode .markdown-section pre[data-lang="cpp"],
+    body.dark-mode .markdown-section pre[data-lang="c"] { border-left-color: #00ADD8 !important; }
+    body.dark-mode .markdown-section pre[data-lang="in"],
+    body.dark-mode .markdown-section pre[data-lang="input"],
+    body.dark-mode .markdown-section pre[data-lang="out"],
+    body.dark-mode .markdown-section pre[data-lang="output"],
+    body.dark-mode .markdown-section pre[data-lang="txt"],
+    body.dark .markdown-section pre[data-lang="in"],
+    html.dark .markdown-section pre[data-lang="in"] {
+      background: #241E0A !important;
+      border-color: #3D3410 !important;
+      border-left-color: #E8A838 !important;
+      box-shadow: none !important;
+    }
+    body.dark-mode .markdown-section pre[data-lang="in"]::before { background: #2E260A !important; border-color: #4A3C12 !important; color: #E8A838 !important; }
+    body.dark-mode .markdown-section pre[data-lang="out"]::before { background: #122620 !important; border-color: #1E3A2E !important; color: #4EC9B0 !important; }
+    body.dark-mode .markdown-section pre::-webkit-scrollbar-thumb,
+    body.dark .markdown-section pre::-webkit-scrollbar-thumb { background: #2A2F4A !important; border-color: #1E2130 !important; }
+    body.dark-mode .markdown-section pre[data-lang="in"]::-webkit-scrollbar-thumb { border-color: #241E0A !important; background: #4A3C12 !important; }
+
+    /* dark prism tokens — unified */
+    body.dark-mode .markdown-section pre .token.comment,
+    body.dark .markdown-section pre .token.comment,
+    html.dark .markdown-section pre .token.comment { color: #7A829E !important; }
+    body.dark-mode .markdown-section pre .token.keyword,
+    body.dark-mode .markdown-section pre .token.builtin,
+    body.dark-mode .markdown-section pre .token.tag,
+    body.dark .markdown-section pre .token.keyword,
+    html.dark .markdown-section pre .token.keyword { color: #9B8CFF !important; }
+    body.dark-mode .markdown-section pre .token.string,
+    body.dark .markdown-section pre .token.string,
+    html.dark .markdown-section pre .token.string { color: #4EC9B0 !important; }
+    body.dark-mode .markdown-section pre .token.function,
+    body.dark .markdown-section pre .token.function,
+    html.dark .markdown-section pre .token.function { color: #569CD6 !important; }
+    body.dark-mode .markdown-section pre .token.number,
+    body.dark-mode .markdown-section pre .token.boolean,
+    body.dark .markdown-section pre .token.number,
+    html.dark .markdown-section pre .token.number { color: #F6A85E !important; }
+    body.dark-mode .markdown-section pre .token.operator,
+    body.dark .markdown-section pre .token.operator { color: #9AA0B6 !important; }
+    body.dark-mode .markdown-section pre .token.punctuation,
+    body.dark .markdown-section pre .token.punctuation,
+    html.dark .markdown-section pre .token.punctuation { color: #9AA0B6 !important; }
+    body.dark-mode .markdown-section pre .token.class-name,
+    body.dark-mode .markdown-section pre .token.type,
+    body.dark .markdown-section pre .token.class-name,
+    html.dark .markdown-section pre .token.class-name { color: #F0C674 !important; }
+    body.dark-mode .markdown-section pre .token.variable,
+    body.dark .markdown-section pre .token.variable { color: #E6E8F2 !important; }
+    body.dark-mode .markdown-section pre ::selection { background: rgba(155,140,255,0.28) !important; }
+
+    /* inline code dark */
+    body.dark-mode .markdown-section p > code,
+    body.dark-mode .markdown-section li > code,
+    body.dark-mode .markdown-section td > code,
+    body.dark-mode .markdown-section h1 code, body.dark-mode .markdown-section h2 code, body.dark-mode .markdown-section h3 code,
+    body.dark .markdown-section p > code,
+    html.dark .markdown-section p > code {
+      background: #2A2F45 !important;
+      color: #B8BDF0 !important;
+      border-color: #3A415C !important;
+    }
+
+    /* copy button dark */
+    body.dark-mode .docsify-copy-code-button,
+    body.dark-mode .markdown-section pre .docsify-copy-code-button,
+    body.dark .docsify-copy-code-button,
+    html.dark .docsify-copy-code-button {
+      background: #2A2F45 !important;
+      color: #A8ADC8 !important;
+      border-color: #3A415C !important;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
+    }
+    body.dark-mode .docsify-copy-code-button:hover {
+      color: #E6E8F2 !important;
+      border-color: #5B4DBC !important;
+      background: #2E344D !important;
+    }
+    /* mobile toggle position — 跟随桌面改至右下角 */
+    @media (max-width: 768px) {
+      .darklight-btn { bottom: 16px; right: 16px; top: auto; left: auto; width: 36px; height: 36px; font-size: 15px; }
+      body.dark-mode .sidebar, body.dark .sidebar { box-shadow: 4px 0 24px rgba(0,0,0,0.4) !important; }
+    }
+  </style>
+  <!-- Early dark-mode apply to avoid FOUC -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('docsify-dark-mode') || localStorage.getItem('dark-mode');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var shouldDark = saved ? (saved === 'dark' || saved === 'true') : prefersDark;
+        if (shouldDark) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+          document.addEventListener('DOMContentLoaded', function(){ document.body.classList.add('dark-mode'); document.body.classList.add('dark'); });
+          if (document.body) { document.body.classList.add('dark-mode'); document.body.classList.add('dark'); }
+        }
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="app">加载中...</div>
+  <!-- Dark mode toggle — hello-agents style, theme #6A5ACD -->
+  <button id="dark-mode-toggle" class="darklight-btn" aria-label="切换深色模式" title="切换深色模式">
+    <span class="icon-moon" aria-hidden="true">🌙</span>
+    <span class="icon-sun" aria-hidden="true">☀️</span>
+  </button>
+  <script>
+    window.$docsify = {
+      name: 'PTA · Go实现',
+      repo: 'https://github.com/Zonkidd-Shao/pta_basic_program_article_by_go',
+      loadSidebar: true,
+      subMaxLevel: 3,
+      auto2top: true,
+      coverpage: false,
+      onlyCover: false,
+      // 全文搜索
+      search: {
+        maxAge: 86400000,
+        paths: 'auto',
+        placeholder: '🔍 搜索题号 / 关键词',
+        noData: '没有结果',
+        depth: 4,
+        hideOtherSidebarContent: false,
+      },
+      // 分页
+      pagination: {
+        previousText: '上一题',
+        nextText: '下一题',
+        crossChapter: true,
+        crossChapterText: true,
+      },
+      // 字数统计
+      count: {
+        countable: true,
+        fontsize: '0.9em',
+        color: 'rgb(90,90,90)',
+        language: 'chinese'
+      },
+      // 复制代码
+      copyCode: {
+        buttonText: '复制',
+        errorText: '失败',
+        successText: '已复制'
+      },
+      // 侧边栏折叠
+      alias: {
+        '/.*/_sidebar.md': '/_sidebar.md'
+      },
+      plugins: [
+        function(hook, vm) {
+          hook.beforeEach(function(html) {
+            // 在每页顶部注入编辑链接
+            var url = 'https://github.com/Zonkidd-Shao/pta_basic_program_article_by_go/blob/main/' + vm.route.file;
+            var editHtml = '[:memo: 在 GitHub 上编辑](' + url + ')\n\n';
+            return editHtml + html;
+          });
+        }
+      ]
+    }
+  </script>
+  <!-- Docsify core -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  <!-- 插件 -->
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/zoom-image.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-count/dist/countable.js"></script>
+  <!-- 代码高亮：仓颉复用 JS/C 高亮，额外支持 -->
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-go.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-cpp.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+  <!-- Mermaid 支持（可选） -->
+  <script src="//cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: false });
+    // 让 docsify 支持 ```mermaid 块
+    window.$docsify.plugins = (window.$docsify.plugins || []).concat(function(hook, vm){
+      hook.doneEach(function(){
+        document.querySelectorAll('pre code.lang-mermaid').forEach(function(el){
+          var container = document.createElement('div');
+          container.className = 'mermaid';
+          container.textContent = el.textContent;
+          el.parentElement.replaceWith(container);
+        });
+        if (window.mermaid) mermaid.run();
+      });
+    });
+  </script>
+  <!-- Dark mode toggle logic — unified on body.dark-mode -->
+  <script>
+    (function() {
+      var STORAGE_KEY = 'docsify-dark-mode';
+      var btn = document.getElementById('dark-mode-toggle');
+      if (!btn) return;
+
+      function applyDark(isDark, save) {
+        document.body.classList.toggle('dark-mode', isDark);
+        document.body.classList.toggle('dark', isDark);
+        document.documentElement.classList.toggle('dark', isDark);
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        if (save) {
+          try { localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light'); } catch(e) {}
+        }
+        // update accessible label
+        btn.setAttribute('aria-label', isDark ? '切换到浅色模式' : '切换到深色模式');
+        btn.setAttribute('title', isDark ? '切换到浅色模式' : '切换到深色模式');
+        // keep docsify-darklight in sync if it tried to control — dispatch event
+        try { window.dispatchEvent(new CustomEvent('dark-mode-change', { detail: { dark: isDark } })); } catch(e) {}
+      }
+
+      // init: respect saved value, else system preference
+      var saved = null;
+      try { saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('dark-mode'); } catch(e) {}
+      if (saved === 'dark' || saved === 'light') {
+        applyDark(saved === 'dark', false);
+      } else if (window.matchMedia) {
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyDark(prefersDark, false);
+        // listen to system changes only if no explicit saved preference
+        try {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e){
+            var curSaved = null;
+            try { curSaved = localStorage.getItem(STORAGE_KEY); } catch(err) {}
+            if (!curSaved) applyDark(e.matches, false);
+          });
+        } catch(e) {
+          // Safari fallback
+          try { window.matchMedia('(prefers-color-scheme: dark)').addListener(function(e){ 
+            var curSaved = null;
+            try { curSaved = localStorage.getItem(STORAGE_KEY); } catch(err) {}
+            if (!curSaved) applyDark(e.matches, false);
+          }); } catch(err) {}
+        }
+      }
+
+      btn.addEventListener('click', function() {
+        var isDark = document.body.classList.contains('dark-mode');
+        applyDark(!isDark, true);
+      });
+
+      // keyboard shortcut: press 'd' to toggle (optional, hello-agents style)
+      document.addEventListener('keydown', function(e){
+        if ((e.key === 'd' || e.key === 'D') && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          var isDark = document.body.classList.contains('dark-mode');
+          applyDark(!isDark, true);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
