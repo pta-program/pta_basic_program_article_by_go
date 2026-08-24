@@ -101,5 +101,3 @@ python -m http.server 3000
 ## 📄 许可
 
 MIT License — 欢迎 Star / 提 Issue / PR 完善题解。
-
-> *样式参考 [Datawhale/hello-agents](https://datawhalechina.github.io/hello-agents/#/)，基于 Docsify 构建。*
