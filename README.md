@@ -98,12 +98,6 @@ python -m http.server 3000
 
 ---
 
-## 🔗 相关仓库
-
-本系列另有 **C / C++ / Java / Python / Go / JavaScript / Lua / Perl / Ruby / R** 等 10 种语言实现，见 [pta_basic_program](https://github.com/Zonkidd-Shao) 组织。
-
----
-
 ## 📄 许可
 
 MIT License — 欢迎 Star / 提 Issue / PR 完善题解。
