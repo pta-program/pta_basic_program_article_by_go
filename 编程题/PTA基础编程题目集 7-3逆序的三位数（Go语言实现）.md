@@ -81,6 +81,7 @@ func main() {
 	fmt.Println(reversed)
 }
 ```
+
 ## 代码流程说明
 
 1. 导入 fmt 包，声明整型变量 n 存储输入的三位数。

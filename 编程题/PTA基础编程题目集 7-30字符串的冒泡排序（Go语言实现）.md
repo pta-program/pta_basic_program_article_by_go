@@ -56,6 +56,7 @@ Go 中字符串可以用关系运算符直接比较字典序：`strs[j] > strs[j
 ### 3. 输入与输出的格式控制
 
 用 fmt.Scan 读入 N 和 K，再逐行读入 N 个字符串存入 string 切片 strs。K 趟排序结束后逐行输出每个字符串（每行一个），这与整数冒泡排序的一行输出不同。
+
 ## 完整代码
 
 ```go
@@ -120,7 +121,7 @@ flowchart TD
     K --> E
     E -- 否 --> L[i = 0]
     L --> M{"i < n?"}
-    M -- 是 --> N[fmt.Println 输出 strs[i]]
+    M -- 是 --> N["fmt.Println 输出 strs[i]"]
     N --> O[i++]
     O --> M
     M -- 否 --> P[结束]

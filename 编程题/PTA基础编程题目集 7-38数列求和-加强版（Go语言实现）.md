@@ -130,7 +130,7 @@ flowchart TD
     K --> G
     G --> L[遍历完成]
     L --> M{"carry > 0?"}
-    M -- 是 --> N[result[0] = carry 存入最高位]
+    M -- 是 --> N["result[0] = carry 存入最高位"]
     N --> O["从 i=0 到 N 依次输出 result[i]"]
     M -- 否 --> P["从 i=1 到 N 依次输出 result[i]"]
     O --> Q[fmt.Println 输出换行]

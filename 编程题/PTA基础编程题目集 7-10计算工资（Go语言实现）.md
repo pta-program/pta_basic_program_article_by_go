@@ -112,7 +112,7 @@ func main() {
 2. 定义 years、hours 为 int，rate、salary 为 float64。
 3. 用 fmt.Scan(&years, &hours) 读取入职年数与周工作时间。
 4. 判断 years >= 5：成立则 rate = 50.0（老职工）；否则 rate = 30.0（新职工）。
-5. 判断 hours <= 40：成立则 salary = float64(hours) * rate；否则 salary = 40*rate + float64(hours-40)*rate*1.5。
+5. 判断 `hours <= 40`：成立则 `salary = float64(hours) × rate`；否则 `salary = 40 × rate + float64(hours-40) × rate × 1.5`。
 6. 用 fmt.Printf("%.2f\n", salary) 输出周薪，保留两位小数。
 7. 程序结束，main 函数自然返回。
 
@@ -206,7 +206,7 @@ salary = 40*rate + float64(hours)*rate*1.5
 
 ### 3. int 与 float64 混用
 
-hours 是 int 类型，与 float64 的 rate 相乘必须显式转换，如 float64(hours) * rate。若直接写 salary = hours * rate，Go 编译器会因类型不匹配而报错，程序无法通过编译。
+hours 是 int 类型，与 float64 的 rate 相乘必须显式转换，如 `float64(hours) × rate`。若直接写 `salary = hours × rate`，Go 编译器会因类型不匹配而报错，程序无法通过编译。
 
 ### 4. 小数位输出
 

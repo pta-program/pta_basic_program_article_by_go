@@ -42,6 +42,37 @@ func main() {
 1307674368000
 ```
 
+## 函数部分
+
+```go
+func Print_Factorial(N int) {
+    if N < 0 {
+        fmt.Println("Invalid input")
+        return
+    }
+    digits := make([]int, 3000)
+    digits[0] = 1
+    last := 0
+    for factor := 2; factor <= N; factor++ {
+        carry := 0
+        for i := 0; i <= last; i++ {
+            value := digits[i]*factor + carry
+            digits[i] = value % 10
+            carry = value / 10
+        }
+        for carry > 0 {
+            last++
+            digits[last] = carry % 10
+            carry /= 10
+        }
+    }
+    for i := last; i >= 0; i-- {
+        fmt.Printf("%d", digits[i])
+    }
+    fmt.Println()
+}
+```
+
 ## 解题思路
 
 这道题的核心是**大数乘法模拟**：`N` 最大为 1000，`1000!` 远超 `int` 范围，必须用大数乘法模拟。用数组 `ret` 从低位到高位逐位存储结果的每一位，初始 `ret[0] = 1`（即 0!）。从因子 2 乘到 `N`，每次乘法把数组的每一位乘以当前因子并处理进位；当最高位产生新进位（`up > 0 && j == n`）时位数 `n` 加一。最后从最高位到最低位倒序输出每一位即为最终阶乘结果。
@@ -165,3 +196,14 @@ flowchart TD
     D --> J["结束"]
     I --> J
 ```
+
+## 复杂度分析
+
+设当前结果最多有 `d` 位，逐个乘以 2 到 N 时每次都要处理已有数字位，时间复杂度为 `O(Nd)`；由于 `d = O(N log N)`，可写为 `O(N² log N)`。数组保存结果的额外空间复杂度为 `O(d)`。
+
+## 常见易错点
+
+1. 不能直接用 `int` 保存 1000!，必须用数组逐位模拟大数乘法。
+2. 数组下标 0 保存个位，输出时必须从最高位向下标 0 倒序输出。
+3. 每一位计算后要保留 `tmp % 10`，并将 `tmp / 10` 传给下一位作为进位。
+4. N<0 时应输出 `Invalid input` 并立即返回；N=0 或 N=1 时结果都应为 1。

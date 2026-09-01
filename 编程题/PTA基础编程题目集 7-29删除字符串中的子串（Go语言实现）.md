@@ -46,6 +46,7 @@ Tom is a male
 ### 3. 读取含空格的整行输入
 
 S1 中可能含有空格（如样例 "Tomcat is a male ccatat"），fmt.Scan 按空白字符分割输入，无法读取完整的一行。需用 bufio.NewReader 的 ReadString('\n') 读取整行，再用 strings.TrimRight(s, "\r\n") 仅去掉行尾换行符，保留首尾空格。
+
 ## 完整代码
 
 ```go

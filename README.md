@@ -3,8 +3,8 @@
 > 覆盖 PTA《基础编程题目集》全部 **51 题**（函数题 13 题 + 编程题 38 题），逐题提供「题目还原 → 解题思路 → 完整可运行 Go 代码 → 坑点解析」。
 
 [![Docsify](https://img.shields.io/badge/docs-docsify-42b983?style=flat-square)](https://docsify.js.org)
-[![Language](https://img.shields.io/badge/language-Go-00ADD8?style=flat-square)]()
-[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)]()
+![Language](https://img.shields.io/badge/language-Go-00ADD8?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
 
 ---
 
@@ -21,16 +21,16 @@
 - **前言** — 考点与易错点一句话概括
 - **题目描述 / 输入输出格式 / 样例**
 - **解题思路** — 分步骤讲清关键推导
-- **完整代码** — `cangjie` 代码块，可直接 `go run`，附详细注释
+- **完整代码** — `go` 代码块，可直接 `go run`，附详细注释
 
-> 代码风格统一：``fmt` / `bufio` / `strings`` 处理输入，以 `fmt` / `bufio` 处理输入，`main` 只做 IO 与调用。
+> 代码风格统一：使用 `fmt` / `bufio` / `strings` 处理输入输出，`main` 只负责 IO 与调用。
 
 ---
 
 ## 🗂️ 目录导航
 
 | 模块 | 数量 | 内容 |
-|------|------|------|
+| --- | --- | --- |
 | **函数题 6-1 ~ 6-13** | 13 题 | 简单输出、求和/均值/极值、阶乘、完全平方、链表等 |
 | **编程题 7-1 ~ 7-38** | 38 题 | 单位换算、分支循环、字符串、排序、数列、模拟等 |
 
@@ -46,7 +46,7 @@ npm i -g docsify-cli
 docsify serve .
 
 # 方式二：任意静态服务
-python -m http.server 3000
+python3 -m http.server 3000
 # 浏览器打开 http://localhost:3000
 ```
 
@@ -57,7 +57,7 @@ python -m http.server 3000
 ### 函数题（6-1 ~ 6-13）
 
 | 题号 | 标题 |
-|------|------|
+| ------ | ------ |
 | 6-1 | 简单输出整数 |
 | 6-2 | 多项式求值 |
 | 6-3 | 简单求和 |
@@ -75,7 +75,7 @@ python -m http.server 3000
 ### 编程题（7-1 ~ 7-38）
 
 | 题号 | 标题 | 题号 | 标题 |
-|------|------|------|------|
+| ------ | ------ | ------ | ------ |
 | 7-1 | 厘米换算英尺英寸 | 7-20 | 打印九九口诀表 |
 | 7-2 | 然后是几点 | 7-21 | 求特殊方程的正整数解 |
 | 7-3 | 逆序的三位数 | 7-22 | 龟兔赛跑 |

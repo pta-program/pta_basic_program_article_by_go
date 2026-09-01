@@ -179,7 +179,14 @@ if c == ' ' {
 if c == '.' {
     break
 }
-...
+if c == ' ' {
+    if length > 0 {
+        result = append(result, length)
+        length = 0
+    }
+} else {
+    length++
+}
 if length > 0 {
     result = append(result, length)
 }

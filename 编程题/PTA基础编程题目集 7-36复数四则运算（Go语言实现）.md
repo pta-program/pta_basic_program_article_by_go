@@ -192,7 +192,7 @@ flowchart TD
         M[fmt.Print输出左括号] --> N[printComplex打印C1]
         N --> O["fmt.Print输出)运算符("]
         O --> P[printComplex打印C2]
-        P --> Q[fmt.Print输出) =]
+        P --> Q["fmt.Print输出) ="]
         Q --> R[printComplex打印结果]
         R --> S[fmt.Println输出换行]
     end

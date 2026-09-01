@@ -96,6 +96,7 @@ func main() {
 	fmt.Printf("%d%02d\n", total/60, total%60)
 }
 ```
+
 ## 代码流程说明
 
 1. 导入 fmt 包，声明 time（起始时间）与 goTime（流逝分钟数）两个整型变量。

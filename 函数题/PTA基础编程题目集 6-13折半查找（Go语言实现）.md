@@ -103,6 +103,26 @@ func main() {
 NOT FOUND
 ```
 
+## 函数部分
+
+```go
+func Search_Bin(T SSTable, k KeyType) int {
+    start := 1
+    end := T.length
+    for start <= end {
+        mid := (start + end) / 2
+        if T.R[mid].key == k {
+            return mid
+        } else if T.R[mid].key > k {
+            end = mid - 1
+        } else {
+            start = mid + 1
+        }
+    }
+    return 0
+}
+```
+
 ## 解题思路
 
 这道题的核心是**二分查找折半收缩**：二分查找适用于有序表，核心思路是不断把查找区间折半：用 `start`、`end` 指向区间两端（该表下标从 1 开始），取中间位置 `mid` 与 `k` 比较——相等则找到；`T.R[mid].key < k` 说明目标在右半区，把 `start` 移到 `mid + 1`；`T.R[mid].key > k` 则目标在左半区，把 `end` 移到 `mid - 1`。当 `start > end` 时区间为空，说明未找到，返回 0。
@@ -235,3 +255,14 @@ flowchart TD
     E --> L["结束"]
     H --> L
 ```
+
+## 复杂度分析
+
+每次比较都把查找区间缩小约一半，因此时间复杂度为 `O(log n)`；只维护边界和中点，空间复杂度为 `O(1)`。
+
+## 常见易错点
+
+1. `SSTable.R` 的有效元素从下标 1 开始，边界应初始化为 `start=1`、`end=T.length`。
+2. 找到目标时返回中点位置；查找区间耗尽后必须返回 0，以便主程序输出 `NOT FOUND`。
+3. 向左收缩应写成 `end = mid - 1`，向右收缩应写成 `start = mid + 1`，否则可能死循环。
+4. 只有在表已按严格递增顺序排列时，才能依据大小关系舍弃一半区间。

@@ -50,6 +50,7 @@ llo World!He
 ### 4. 整行读取与换行处理
 
 字符串可能含空格（如 "Hello World!"），需用 bufio.NewReader 的 ReadString('\n') 读取整行，再判断并去掉末尾的换行符，否则换行符会被当作字符参与左移。
+
 ## 完整代码
 
 ```go
@@ -92,37 +93,26 @@ func main() {
 
 1. 导入 fmt、bufio、os 包，用于输入输出。
 2. 使用 bufio.NewReader(os.Stdin).ReadString('\n') 读取整行字符串（可包含空格）存入变量 s。
-3. 将 string 转为 []byte 切片 sBytes，若末尾为换行符则截断并更新长度。
-4. 使用 fmt.Scan 读取整数 N。
-5. 对 N 取模：n = n % length，当 N ≥ length 时只需移动余数次。
-6. 循环从 i = n 到 i < length，依次输出 sBytes[i]，即被移到前面的部分。
-7. 循环从 i = 0 到 i < n，依次输出 sBytes[i]，即被移到后面的前 n 个字符。
-8. fmt.Println 输出换行符，main 函数自然结束。
+3. 使用 `strings.TrimRight` 去掉末尾的换行符；若字符串为空则输出空行并结束。
+4. 使用 `fmt.Fscan(reader, &n)` 读取整数 `n`。
+5. 对 `n` 取模：`n = n % len(s)`，当 `n ≥ len(s)` 时只需移动余数次。
+6. 用切片拼接 `s[n:] + s[:n]`：后半段移到前面，前 `n` 个字符移到末尾。
+7. 用 `fmt.Println` 输出拼接结果，`main` 函数自然结束。
 
 ## 代码流程图
 
 ```mermaid
 flowchart TD
-    A[开始] --> B[读取字符串到 s]
-    B --> C[sBytes = []byte(s)]
-    C --> D[length = len(sBytes)]
-    D --> E{"sBytes[length-1] == '\n'?"}
-    E -- 是 --> F[截断换行符, length 减 1]
-    E -- 否 --> G[fmt.Scan 读入 n]
-    F --> G
-    G --> H["n = n % length"]
-    H --> I[i = n]
-    I --> J{"i < length?"}
-    J -- 是 --> K[fmt.Printf 输出 sBytes[i]]
-    K --> L[i++]
-    L --> J
-    J -- 否 --> M[i = 0]
-    M --> N{"i < n?"}
-    N -- 是 --> O[fmt.Printf 输出 sBytes[i]]
-    O --> P[i++]
-    P --> N
-    N -- 否 --> Q[fmt.Println 换行]
-    Q --> R[结束]
+    A[开始] --> B["ReadString 读取整行 s"]
+    B --> C["TrimRight 去除换行"]
+    C --> D{"len(s) == 0?"}
+    D -- 是 --> E["输出空行并结束"]
+    D -- 否 --> F["Fscan 读取 n"]
+    F --> G["n = n % len(s)"]
+    G --> H["result = s[n:] + s[:n]"]
+    H --> I["输出 result"]
+    E --> J[结束]
+    I --> J
 ```
 
 ## 解题流程图
@@ -144,15 +134,14 @@ flowchart TD
 
 ```go
 s, _ := reader.ReadString('\n')
-sBytes := []byte(s)
-length := len(sBytes)
-if length > 0 && sBytes[length-1] == '\n' {
-    sBytes = sBytes[:length-1]
-    length--
+s = strings.TrimRight(s, "\r\n")
+if len(s) == 0 {
+    fmt.Println("")
+    return
 }
 ```
 
-ReadString 读取的内容包含末尾换行符，需先判断并截断，否则换行符会被当作字符串的一部分参与左移，导致结果错误。
+ReadString 读取的内容可能包含末尾换行符，使用 `strings.TrimRight` 去掉它；空字符串需要提前返回，避免后续对 `len(s)` 取模时除零。
 
 ### N 对长度取模
 
@@ -162,43 +151,39 @@ n = n % length
 
 循环左移 N 次与左移 N % length 次效果相同。例如 length=4 时左移 6 次等价于左移 2 次，取模避免了无意义的重复移动，也处理了 N 大于等于长度的情况。
 
-### 分段输出
+### 分段拼接
 
 ```go
-for i := n; i < length; i++ {
-    fmt.Printf("%c", sBytes[i])
-}
-for i := 0; i < n; i++ {
-    fmt.Printf("%c", sBytes[i])
-}
+result := s[n:] + s[:n]
+fmt.Println(result)
 ```
 
-先输出后半段 [n, length)，再输出前半段 [0, n)，两部分拼接即为循环左移 n 次后的字符串。使用 %c 逐字符输出，避免字符串拼接带来的额外开销。
+先取后半段 `s[n:]`，再取前半段 `s[:n]`，两部分拼接即为循环左移 n 次后的字符串。
 
 ## 复杂度分析
 
 设字符串的长度为 n：
 
 - 时间复杂度：`O(n)`。取模运算为 O(1)，两段遍历总共访问每个字符恰好一次。
-- 空间复杂度：`O(n)`，将字符串转为 []byte 切片需要与串长相当的空间。
+- 空间复杂度：`O(n)`，结果字符串需要与输入长度相当的空间。
 
 ## 常见易错点
 
 ### 1. 忘记去掉末尾换行符
 
-ReadString 读入的字符串以 '\n' 结尾。若不处理，换行符会被当作字符参与取模和左移，且 Println 还会再输出一个换行，导致结果中混入多余换行。必须先截断换行符。
+ReadString 读入的字符串可能以 `\n` 结尾。若不处理，换行符会被当作字符参与左移，且 `Println` 还会再输出一个换行，导致结果中混入多余换行。必须先去掉换行符。
 
 ### 2. 忽略 N 大于等于字符串长度的情况
 
-若不对 N 取模，例如 length=3、N=5，直接按下标 5 开始输出 sBytes 会越界。先取模 n = 5 % 3 = 2 后，两段下标都落在 [0, length) 范围内。
+若不对 `n` 取模，例如 `len(s)=3`、`n=5`，直接切片 `s[5:]` 会越界。先取模 `n = 5 % 3 = 2` 后，两段切片下标都合法。
 
 ### 3. 两段输出顺序颠倒
 
-若先输出前 n 个字符再输出后半段，得到的是原字符串（先 [0,n) 再 [n,length) 即原顺序），无法实现左移。必须先输出 [n, length) 再输出 [0, n)。
+若先拼接 `s[:n]` 再拼接 `s[n:]`，得到的是原字符串，无法实现左移。必须先拼接 `s[n:]`，再拼接 `s[:n]`。
 
 ### 4. 用 fmt.Scan 读取含空格的字符串
 
-输入 "Hello World!" 含空格，fmt.Scan 只能读到 "Hello"。必须用 bufio 的 ReadString 读取整行，才能保留行内空格。
+输入 "Hello World!" 含空格，`fmt.Scan` 只能读到 "Hello"。必须用 `bufio` 的 `ReadString` 读取整行，才能保留行内空格。
 
 ## 更多测试
 
@@ -211,7 +196,7 @@ Hello World!
 0
 ```
 
-推演：length=12，n = 0 % 12 = 0。第一段循环 i 从 0 到 11 输出全部字符 "Hello World!"，第二段不执行。输出：
+推演：`len(s)=12`，`n = 0 % 12 = 0`，拼接 `s[0:] + s[:0]` 得到原字符串。输出：
 
 ```text
 Hello World!
@@ -226,7 +211,7 @@ abcd
 6
 ```
 
-推演：length=4，n = 6 % 4 = 2。先输出 sBytes[2..3]="cd"，再输出 sBytes[0..1]="ab"，拼接得 "cdab"。输出：
+推演：`len(s)=4`，`n = 6 % 4 = 2`。先取 `s[2:]="cd"`，再取 `s[:2]="ab"`，拼接得 "cdab"。输出：
 
 ```text
 cdab
@@ -241,7 +226,7 @@ abc
 3
 ```
 
-推演：length=3，n = 3 % 3 = 0。第一段循环输出全部字符 "abc"，第二段不执行，输出原串。输出：
+推演：`len(s)=3`，`n = 3 % 3 = 0`，拼接 `s[0:] + s[:0]` 得到原串。输出：
 
 ```text
 abc

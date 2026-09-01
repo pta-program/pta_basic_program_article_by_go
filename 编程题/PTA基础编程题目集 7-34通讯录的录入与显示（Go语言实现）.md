@@ -137,7 +137,7 @@ func main() {
 flowchart TD
     A[开始] --> B[type Contact struct定义]
     B --> C[fmt.Scan读取整数n]
-    C --> D[make([]Contact, n)]
+    C --> D["make([]Contact, n)"]
     D --> E[i = 0]
     E --> F{"i < n?"}
     F -- 是 --> G["fmt.Scan读取姓名、生日、性别、固话、手机存入contacts[i]"]

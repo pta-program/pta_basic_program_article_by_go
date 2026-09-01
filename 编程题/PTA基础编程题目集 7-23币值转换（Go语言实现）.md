@@ -114,13 +114,15 @@ func main() {
             }
             continue
         }
-        if needZero && result != "" {
-            result += string(num[0])
-            needZero = false
-        }
         // 组内转换：处理千百十个位
         inner := ""
         zeroFlag := false
+        zeroAlreadyEmitted := false
+        if needZero && result != "" {
+            result += string(num[0])
+            needZero = false
+            zeroAlreadyEmitted = true
+        }
         for i := 0; i < len(g); i++ {
             d := int(g[i] - '0')
             posInGroup := len(g) - 1 - i
@@ -140,7 +142,13 @@ func main() {
                 inner += string(num[d])
                 inner += unit
             } else {
-                zeroFlag = true
+                // 若前面已因跨级空组补过零，则忽略当前组开头的零，避免重复输出。
+                if !zeroAlreadyEmitted {
+                    zeroFlag = true
+                }
+            }
+            if d != 0 {
+                zeroAlreadyEmitted = false
             }
         }
         result += inner + gUnit
@@ -151,37 +159,30 @@ func main() {
 
 ## 代码流程说明
 
-1. 声明字符串 n，用 fmt.Scan 读取输入。
-2. 把每位数字转换为整型数组 digits。
-3. 遍历每一位：
-   - 非零位：若前有零则先输出 'a'，再输出数字字符和对应单位；
-   - 零位：标记 prevZero = true，等待后续非零位触发输出。
-4. 遍历结束后若 result 为空（全为零），则输出 "a"。
-5. 输出最终结果。
+1. 声明字符串 `s`，用 `fmt.Scan` 读取输入；输入为 `0` 时直接输出 `a`。
+2. 从右向左每四位分成一组，保存到 `groups`，并用 `groupUnits` 确定每组的万、亿单位。
+3. 依次处理每组：全零组只记录 `needZero`，非零组按千、百、十、个位转换；组内或组间出现空位时补一个 `a`。
+4. 将当前组的文字与级单位拼接到 `result`，最后输出结果。
 
 ## 代码流程图
 
 ```mermaid
 flowchart TD
-    A[开始] --> B[读取整数 n]
-    B --> C[转换为数字数组]
-    C --> D[逐位处理]
-    D --> E{"当前位非零?"}
-    E -- 是 --> F{"前一位是否为零?"}
-    F -- 是 --> G[补输出 'a']
-    F -- 否 --> H[输出数字字符]
-    G --> H
-    H --> I[添加单位字符]
-    I --> J[prevZero = false]
-    E -- 否 --> K[prevZero = true]
-    J --> L{"还有下一位?"}
-    K --> L
-    L -- 是 --> D
-    L -- 否 --> M{result为空?}
-    M -- 是 --> N[输出 'a']
-    M -- 否 --> O[输出 result]
-    N --> P[结束]
-    O --> P
+    A[开始] --> B["读取字符串 s"]
+    B --> C{"s == 0?"}
+    C -- 是 --> D["输出 a 并结束"]
+    C -- 否 --> E["按四位分组"]
+    E --> F["依次处理每个分组"]
+    F --> G{"当前组全为零?"}
+    G -- 是 --> H["标记 needZero"]
+    G -- 否 --> I["处理千百十个位"]
+    H --> J{"还有下一组?"}
+    I --> K["补零并追加级单位"]
+    K --> J
+    J -- 是 --> F
+    J -- 否 --> L["输出 result"]
+    D --> M[结束]
+    L --> M
 ```
 
 ## 解题流程图
@@ -199,65 +200,57 @@ flowchart TD
 
 ## 代码解析
 
-### 读取输入与数字转换
+### 读取输入与分组
 
 ```go
-var n string
-fmt.Scan(&n)
+var s string
+fmt.Scan(&s)
 
-digits := make([]int, len(n))
-for i := 0; i < len(n); i++ {
-    digits[i] = int(n[i] - '0')
+groups := []string{}
+for i := len(s); i > 0; i -= 4 {
+    start := i - 4
+    if start < 0 {
+        start = 0
+    }
+    groups = append([]string{s[start:i]}, groups...)
 }
 ```
 
-以字符串形式读取输入，再把每位转换为整数，便于后续按位处理。
+以字符串形式读取输入，再从右向左按四位分组，便于分别处理组内单位和万、亿级单位。
 
 ### 按位处理核心逻辑
 
 ```go
-if d != 0 {
-    if prevZero {
-        result += "a"
-    }
-    result += string(rune('a' + d))
-    // 添加单位
-    ...
-    prevZero = false
-} else {
-    prevZero = true
+if needZero && result != "" {
+    result += string(num[0])
+    needZero = false
+}
+for i := 0; i < len(g); i++ {
+    d := int(g[i] - '0')
+    // d 非零时输出数字和组内单位；零位只在后续出现非零数字时补一个 a。
 }
 ```
 
-非零位先判断前是否有零（有则补 'a'），再输出数字字符和单位；零位仅标记 prevZero，等待后续非零位触发。这样保证连续多个零只输出一个 'a'。
+处理非零组前，若前面存在零组则补一个 `a`；组内连续零只在后续有非零数字时补一个 `a`。对于 `100000001` 这类跨级空组，组间补零和组内开头的零不会重复输出。
 
 ### 单位的确定
 
 ```go
-if pos > 0 && pos%4 == 0 {
-    result += "W" // 万
-} else if pos == 8 {
-    result += "Y" // 亿
-} else {
-    unitPos := pos % 4
-    if unitPos == 1 {
-        result += "S" // 拾
-    } else if unitPos == 2 {
-        result += "B" // 百
-    } else if unitPos == 3 {
-        result += "Q" // 仟
-    }
+idxFromRight := len(groups) - 1 - gi
+gUnit := ""
+if idxFromRight < len(groupUnits) {
+    gUnit = groupUnits[idxFromRight]
 }
 ```
 
-根据位置 pos（从右往左）确定单位：pos%4==0 为万位（但亿位除外），pos==8 为亿位，其余按 pos%4 取 S/B/Q。
+根据分组距离右端的位置选择级单位：最右组无级单位，左一组为 `W`，左二组为 `Y`；组内再根据位置添加 `S/B/Q`。
 
 ## 复杂度分析
 
 设输入整数的位数为 n（n ≤ 9）：
 
 - 时间复杂度：O(n)，每位只做常数时间的处理；
-- 空间复杂度：O(n)，存储数字数组和结果字符串。
+- 空间复杂度：O(n)，存储分组和结果字符串。
 
 ## 常见易错点
 
@@ -326,6 +319,22 @@ a
 ```
 
 推演验证：只有一位 0，result 为空，特殊处理输出 "a"。
+
+### 测试四：跨级空组
+
+输入：
+
+```text
+100000001
+```
+
+输出：
+
+```text
+bYab
+```
+
+推演验证：亿级输出 `bY`，中间的万级为空组补一个 `a`，个位组开头的零不再重复补零，最终得到 `bYab`。
 
 ## 总结
 
